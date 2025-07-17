@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Aviator Logic</title>
+    <style>
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        .back-button {
+            margin-top: 50px;
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .back-button:hover {
+            background-color: #0b7dda;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🚀 Learning Aviator</h1>
+    <h2>Изучение работы с DSL языком AVIATOR</h2>
+    <h3>Версия: <span th:text="${appVersion}">N/A</span></h3>
+    <p><strong>Раздел:</strong> Примеры логических выражений в Aviator</p>
+
+    <a class="back-button" th:href="@{/}">← Назад на главную</a>
+</div>
+</body>
+</html>

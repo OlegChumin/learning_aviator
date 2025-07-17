@@ -3,13 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <title>Learning Aviator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        .header {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .header h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .nav-buttons {
+            margin-top: 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-buttons a {
+            display: block;
+            width: 300px;
+            padding: 8px 16px;
+            font-size: 13px;
+            text-decoration: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 6px;
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-buttons a:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-<div style="text-align: center; margin-top: 100px;">
+<div class="header">
     <h1>🚀 Learning Aviator</h1>
     <h2>Изучение работы с DSL языком AVIATOR</h2>
     <h3>Версия: <span th:text="${appVersion}">N/A</span></h3>
     <p><strong>Автор:</strong> Олег Чумин</p>
+</div>
+
+<div class="nav-buttons">
+    <a th:href="@{/arithmetic}">🔢 Примеры арифметических функций</a>
+    <a th:href="@{/strings}">📝 Примеры строковых выражений</a>
+    <a th:href="@{/logic}">⚖️ Примеры условной логики</a>
+    <a th:href="@{/dates}">📅 Примеры с датами и временем</a>
 </div>
 </body>
 </html>
