@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: learning_aviator
+    version: ${appVersion}
+
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+
+server:
+  port: 8098
+
