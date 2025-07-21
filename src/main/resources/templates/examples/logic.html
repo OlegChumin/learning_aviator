@@ -6,11 +6,39 @@
     <style>
         .container {
             text-align: center;
-            margin-top: 100px;
+            margin-top: 60px;
+            font-family: sans-serif;
+        }
+
+        .form-input {
+            padding: 10px;
+            width: 400px;
+            font-size: 14px;
+        }
+
+        .submit-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 14px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .submit-button:hover {
+            background-color: #45a049;
+        }
+
+        .result {
+            margin-top: 30px;
+            font-size: 16px;
+            color: #333;
         }
 
         .back-button {
-            margin-top: 50px;
+            margin-top: 40px;
             display: inline-block;
             padding: 8px 16px;
             background-color: #2196F3;
@@ -23,6 +51,34 @@
         .back-button:hover {
             background-color: #0b7dda;
         }
+
+        .history-container {
+            max-height: 2.6em;
+            overflow-y: auto;
+            margin-top: 30px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 420px;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .history-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-container::-webkit-scrollbar-thumb {
+            background-color: #bbb;
+            border-radius: 4px;
+        }
+
+        .history-container p {
+            margin: 4px 0;
+        }
     </style>
 </head>
 <body>
@@ -30,7 +86,27 @@
     <h1>🚀 Learning Aviator</h1>
     <h2>Изучение работы с DSL языком AVIATOR</h2>
     <h3>Версия: <span th:text="${appVersion}">N/A</span></h3>
-    <p><strong>Раздел:</strong> Примеры логических выражений в Aviator</p>
+    <p><strong>Раздел:</strong> Логические выражения в Aviator</p>
+
+    <form th:action="@{/logic}" method="post">
+        <label for="expression">Введите выражение:</label>
+        <input id="expression" class="form-input" type="text" name="expression"
+               placeholder="Пример: 5 > 3 && true" required />
+        <br/>
+        <button class="submit-button" type="submit">Выполнить</button>
+    </form>
+
+    <div class="result" th:if="${result != null}">
+        <p><strong>Результат:</strong> <span th:text="${result}"></span></p>
+    </div>
+
+    <p><strong>История последних выражений:</strong></p>
+
+    <div class="history-container" th:if="${history != null}">
+        <ul style="list-style: none; padding: 0; margin: 0;">
+            <li th:each="item : ${history}" th:text="${item}"></li>
+        </ul>
+    </div>
 
     <a class="back-button" th:href="@{/}">← Назад на главную</a>
 </div>
