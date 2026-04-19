@@ -1,0 +1,9 @@
+services:
+  learning-aviator:
+    build:
+      context: .
+    image: learning-aviator:local
+    container_name: learning-aviator
+    ports:
+      - "8098:8098"
+    restart: unless-stopped
