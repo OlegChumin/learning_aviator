@@ -52,6 +52,28 @@ cd learning_aviator
 
 3. Открой в браузере: 👉 [http://localhost:8098](http://localhost:8098)
 
+### Запуск через Docker
+
+Сборка и запуск контейнера:
+
+```bash
+docker compose up -d --build
+```
+
+После запуска приложение доступно по адресу: 👉 [http://localhost:8098](http://localhost:8098)
+
+На Windows можно запустить приложение и автоматически открыть браузер одной командой:
+
+```powershell
+.\run-docker.ps1
+```
+
+Остановка контейнера:
+
+```bash
+docker compose down
+```
+
 ---
 
 ## 📄 Главная страница
