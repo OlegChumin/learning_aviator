@@ -3,7 +3,6 @@ package org.chumin.learning_aviator.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.Model;
 
@@ -29,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *     <li>POST {@code /logic} вычисляет логическое выражение и добавляет историю;</li>
  *     <li>POST {@code /dates} вычисляет выражение с датами и добавляет историю;</li>
  *     <li>ошибки Aviator возвращаются пользователю и не попадают в историю;</li>
+ *     <li>слишком длинные выражения отклоняются до выполнения Aviator;</li>
  *     <li>история не сохраняет дубликаты выражений;</li>
  *     <li>история ограничивается последними 100 уникальными записями.</li>
  * </ul>
@@ -38,17 +38,17 @@ class HomeControllerTest {
     /**
      * Имя атрибута модели, в который контроллер кладет версию приложения.
      */
-    private static final String APP_VERSION = "appVersion";
+    private static final String MODEL_ATTRIBUTE_APP_VERSION = "appVersion";
 
     /**
      * Имя атрибута модели, в который контроллер кладет результат вычисления.
      */
-    private static final String APP_RESULT = "result";
+    private static final String MODEL_ATTRIBUTE_RESULT = "result";
 
     /**
      * Имя атрибута модели, в который контроллер кладет историю вычислений.
      */
-    private static final String APP_HISTORY = "history";
+    private static final String MODEL_ATTRIBUTE_HISTORY = "history";
 
     /**
      * Тестовое значение версии приложения, подставляемое в контроллер вручную.
@@ -61,13 +61,12 @@ class HomeControllerTest {
     private HomeController controller;
 
     /**
-     * Создает новый экземпляр контроллера перед каждым тестом и подставляет
-     * значение поля {@code appVersion}, которое в приложении заполняется Spring.
+     * Создает новый экземпляр контроллера перед каждым тестом с тестовым
+     * значением версии приложения.
      */
     @BeforeEach
     void setUp() {
-        controller = new HomeController();
-        ReflectionTestUtils.setField(controller, APP_VERSION, TEST_VERSION);
+        controller = new HomeController(TEST_VERSION);
     }
 
     @Test
@@ -78,7 +77,7 @@ class HomeControllerTest {
         String viewName = controller.index(model);
 
         assertThat(viewName).isEqualTo("index");
-        assertThat(model.asMap()).containsEntry(APP_VERSION, TEST_VERSION);
+        assertThat(model.asMap()).containsEntry(MODEL_ATTRIBUTE_APP_VERSION, TEST_VERSION);
     }
 
     @Test
@@ -98,8 +97,8 @@ class HomeControllerTest {
         String viewName = controller.evaluateArithmetic("10 + (3 * 5)", model);
 
         assertThat(viewName).isEqualTo("examples/arithmetic");
-        assertThat(model.asMap()).containsEntry(APP_VERSION, TEST_VERSION);
-        assertThat(model.asMap()).containsEntry(APP_RESULT, 25L);
+        assertThat(model.asMap()).containsEntry(MODEL_ATTRIBUTE_APP_VERSION, TEST_VERSION);
+        assertThat(model.asMap()).containsEntry(MODEL_ATTRIBUTE_RESULT, 25L);
         assertHistory(model, "10 + (3 * 5) = 25");
     }
 
@@ -111,7 +110,7 @@ class HomeControllerTest {
         String viewName = controller.evaluateStringExpression("\"Hello\" + \" World\"", model);
 
         assertThat(viewName).isEqualTo("examples/strings");
-        assertThat(model.asMap()).containsEntry(APP_RESULT, "Hello World");
+        assertThat(model.asMap()).containsEntry(MODEL_ATTRIBUTE_RESULT, "Hello World");
         assertHistory(model, "\"Hello\" + \" World\" = Hello World");
     }
 
@@ -123,7 +122,7 @@ class HomeControllerTest {
         String viewName = controller.evaluateLogicExpression("5 > 3 && true", model);
 
         assertThat(viewName).isEqualTo("examples/logic");
-        assertThat(model.asMap()).containsEntry(APP_RESULT, true);
+        assertThat(model.asMap()).containsEntry(MODEL_ATTRIBUTE_RESULT, true);
         assertHistory(model, "5 > 3 && true = true");
     }
 
@@ -135,7 +134,7 @@ class HomeControllerTest {
         String viewName = controller.evaluateDateExpression("now() > 0", model);
 
         assertThat(viewName).isEqualTo("examples/dates");
-        assertThat(model.asMap()).containsEntry(APP_RESULT, true);
+        assertThat(model.asMap()).containsEntry(MODEL_ATTRIBUTE_RESULT, true);
         assertHistory(model, "now() > 0 = true");
     }
 
@@ -146,6 +145,20 @@ class HomeControllerTest {
         assertAviatorError(controller::evaluateStringExpression, "examples/strings");
         assertAviatorError(controller::evaluateLogicExpression, "examples/logic");
         assertAviatorError(controller::evaluateDateExpression, "examples/dates");
+    }
+
+    @Test
+    @DisplayName("Слишком длинное выражение отклоняется до выполнения Aviator")
+    void tooLongExpressionReturnsErrorAndDoesNotAddHistoryEntry() {
+        Model model = new ExtendedModelMap();
+        String expression = "1".repeat(501);
+
+        String viewName = controller.evaluateArithmetic(expression, model);
+
+        assertThat(viewName).isEqualTo("examples/arithmetic");
+        assertThat(model.asMap().get(MODEL_ATTRIBUTE_RESULT)).asString()
+                .isEqualTo("Ошибка: длина выражения не должна превышать 500 символов");
+        assertThat(historyFrom(model)).isEmpty();
     }
 
     @Test
@@ -192,8 +205,8 @@ class HomeControllerTest {
         String viewName = handler.handle(model);
 
         assertThat(viewName).isEqualTo(expectedViewName);
-        assertThat(model.asMap()).containsEntry(APP_VERSION, TEST_VERSION);
-        assertThat(model.asMap()).doesNotContainKey(APP_RESULT);
+        assertThat(model.asMap()).containsEntry(MODEL_ATTRIBUTE_APP_VERSION, TEST_VERSION);
+        assertThat(model.asMap()).doesNotContainKey(MODEL_ATTRIBUTE_RESULT);
     }
 
     /**
@@ -223,7 +236,7 @@ class HomeControllerTest {
         String viewName = handler.handle("10 +", model);
 
         assertThat(viewName).isEqualTo(expectedViewName);
-        assertThat(model.asMap().get(APP_RESULT)).asString().startsWith("Ошибка: ");
+        assertThat(model.asMap().get(MODEL_ATTRIBUTE_RESULT)).asString().startsWith("Ошибка: ");
         assertThat(historyFrom(model)).isEmpty();
     }
 
@@ -231,7 +244,7 @@ class HomeControllerTest {
      * Извлекает историю вычислений из модели.
      * <p>
      * Приведение типа безопасно для этих тестов, потому что контроллер кладет
-     * в атрибут {@link #APP_HISTORY} поле типа {@code Deque<String>}.
+     * в атрибут {@link #MODEL_ATTRIBUTE_HISTORY} поле типа {@code Deque<String>}.
      * </p>
      *
      * @param model MVC-модель, заполненная тестируемым методом контроллера
@@ -239,7 +252,7 @@ class HomeControllerTest {
      */
     @SuppressWarnings("unchecked")
     private Deque<String> historyFrom(Model model) {
-        return (Deque<String>) model.asMap().get(APP_HISTORY);
+        return (Deque<String>) model.asMap().get(MODEL_ATTRIBUTE_HISTORY);
     }
 
     /**

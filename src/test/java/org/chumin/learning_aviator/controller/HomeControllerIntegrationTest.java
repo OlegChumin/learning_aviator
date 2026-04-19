@@ -155,9 +155,9 @@ class HomeControllerIntegrationTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("expression", expression);
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("expression", expression);
 
-        return restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(body, headers), String.class);
+        return restTemplate.exchange(url, HttpMethod.POST, new HttpEntity<>(formData, headers), String.class);
     }
 }
